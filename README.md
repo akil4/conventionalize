@@ -17,7 +17,7 @@ Existing git commit tools fall into two main categories:
 
 ## Installation
 
-### From local source directory (recommended if URL installs are restricted)
+### From local source directory (recommended)
 
 Clone the repository and install locally:
 
@@ -29,29 +29,20 @@ npm run build
 sudo npm install -g .
 ```
 
-### From GitHub archive or Git URL
+### From GitHub release archive or Git URL
 
-If remote or git dependencies are disabled in npm (`EALLOWREMOTE` / `EALLOWGIT`), enable them first:
+Install directly from the GitHub repository archive:
+
+```bash
+npm install -g https://github.com/akil4/conventionalize/archive/refs/tags/v1.0.0.tar.gz
+```
+
+Or enable git dependencies in npm and install via git URL:
 
 ```bash
 npm config set allow-remote true
 npm config set allow-git true
-```
-
-Then install globally from the GitHub archive or repository:
-
-```bash
-npm install -g https://github.com/akil4/conventionalize/archive/refs/heads/master.tar.gz
-# or
 npm install -g git+https://github.com/akil4/conventionalize.git
-```
-
-### From npm registry (once published)
-
-Once published to the public npm registry:
-
-```bash
-npm install -g conventionalize
 ```
 
 ---
