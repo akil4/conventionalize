@@ -17,7 +17,27 @@ Existing git commit tools fall into two main categories:
 
 ## Installation
 
-### From local source directory (recommended)
+### From npm (recommended)
+
+Install globally via npm:
+
+```bash
+npm install -g conventionalize
+```
+
+Or run directly without installing using `npx`:
+
+```bash
+npx conventionalize
+```
+
+Or install as a project devDependency:
+
+```bash
+npm install --save-dev conventionalize
+```
+
+### From local source directory
 
 Clone the repository and install locally:
 
@@ -26,7 +46,7 @@ git clone https://github.com/akil4/conventionalize.git
 cd conventionalize
 npm install
 npm run build
-sudo npm install -g .
+npm install -g .
 ```
 
 ### From GitHub release archive or Git URL
