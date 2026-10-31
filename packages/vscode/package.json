@@ -1,0 +1,8 @@
+{
+  "name": "conventionalize-vscode",
+  "displayName": "Conventionalize",
+  "version": "0.1.0",
+  "publisher": "akil4",
+  "engines": { "vscode": "^1.84.0" },
+  "main": "./dist/extension.js"
+}
