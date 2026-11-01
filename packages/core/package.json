@@ -1,0 +1,21 @@
+{
+  "name": "@conventionalize/core",
+  "version": "1.0.0",
+  "description": "Core Diff-to-Conventional Commit parsing, heuristics, and classification engine.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "keywords": [
+    "git",
+    "conventional-commits",
+    "parser",
+    "classifier",
+    "diff"
+  ],
+  "author": "akil4",
+  "license": "MIT"
+}
