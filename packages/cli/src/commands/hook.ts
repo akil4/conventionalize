@@ -1,12 +1,12 @@
 import chalk from 'chalk';
-import { installGitHook, uninstallGitHook } from '../../core/hooks.js';
+import { installGitHook, uninstallGitHook } from '@conventionalize/core';
 
 export async function handleHookCommand(action: string): Promise<void> {
   if (action === 'install') {
     const res = installGitHook();
     if (res.success) {
       console.log(chalk.bold.green(`\n✔ ${res.message}`));
-      console.log(chalk.gray('Standard `git commit` commands will now automatically use GitCommit AI generated messages!\n'));
+      console.log(chalk.gray('Standard `git commit` commands will now automatically use Conventionalize generated messages!\n'));
     } else {
       console.log(chalk.bold.red(`\n✖ ${res.message}\n`));
     }
@@ -18,6 +18,6 @@ export async function handleHookCommand(action: string): Promise<void> {
       console.log(chalk.bold.red(`\n✖ ${res.message}\n`));
     }
   } else {
-    console.log(chalk.yellow('\nUsage: gcai hook <install|uninstall>\n'));
+    console.log(chalk.yellow('\nUsage: conventionalize hook <install|uninstall>\n'));
   }
 }

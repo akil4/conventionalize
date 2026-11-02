@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import inquirer from 'inquirer';
-import { getConfigPath, loadConfig, saveConfig } from '../../core/config.js';
+import { getConfigPath, loadConfig, saveConfig } from '@conventionalize/core';
 
 export async function handleConfigCommand(options: any): Promise<void> {
   const currentConfig = loadConfig();

@@ -1,9 +1,13 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { getStagedDiff, isGitRepository, getUnstagedDiff } from '../core/git.js';
-import { generateCommitMessage } from '../core/ai.js';
-import { loadConfig } from '../core/config.js';
+import {
+  getStagedDiff,
+  isGitRepository,
+  getUnstagedDiff,
+  generateCommitMessage,
+  loadConfig,
+} from '@conventionalize/core';
 import { startInteractiveCommit } from './interactive.js';
 import { handleConfigCommand } from './commands/config.js';
 import { handleLicenseCommand } from './commands/license.js';

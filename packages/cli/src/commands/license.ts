@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { getLicenseInfo } from '../../core/license.js';
+import { getLicenseInfo } from '@conventionalize/core';
 
 export async function handleLicenseCommand(): Promise<void> {
   const info = getLicenseInfo();

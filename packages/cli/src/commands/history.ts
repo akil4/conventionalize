@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import fs from 'fs';
-import { exportChangelog, getCommitStats, getHistory } from '../../core/history.js';
+import { exportChangelog, getCommitStats, getHistory } from '@conventionalize/core';
 
 export async function handleHistoryCommand(options: any): Promise<void> {
   const history = getHistory();
