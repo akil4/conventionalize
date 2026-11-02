@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseGitDiff } from '../src/core/parser.js';
+import { parseGitDiff } from '@conventionalize/core';
 
 describe('parseGitDiff', () => {
   it('returns empty parsed diff when raw diff is empty', () => {

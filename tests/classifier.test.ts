@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { classifyDiff, inferScope } from '../src/core/classifier.js';
-import { ParsedDiff } from '../src/types/index.js';
+import { classifyDiff, inferScope, ParsedDiff } from '@conventionalize/core';
 
 describe('inferScope', () => {
   it('extracts folder name as scope from standard src structure', () => {

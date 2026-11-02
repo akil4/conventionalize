@@ -2,8 +2,14 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { logCommit, getHistory, getCommitStats, exportChangelog } from '../src/core/history.js';
-import { CommitMessage, LoggedCommit } from '../src/types/index.js';
+import {
+  logCommit,
+  getHistory,
+  getCommitStats,
+  exportChangelog,
+  CommitMessage,
+  LoggedCommit,
+} from '@conventionalize/core';
 
 describe('Commit History & Analytics', () => {
   const tempDir = path.join(os.tmpdir(), `gcai-test-history-${Date.now()}`);

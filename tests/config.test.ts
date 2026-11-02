@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { loadConfig, saveConfig, getDefaultConfig } from '../src/core/config.js';
+import { loadConfig, saveConfig, getDefaultConfig } from '@conventionalize/core';
 
 describe('Config Manager', () => {
   const tempDir = path.join(os.tmpdir(), `gcai-test-config-${Date.now()}`);
