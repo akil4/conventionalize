@@ -1,8 +1,15 @@
 {
   "name": "conventionalize-vscode",
-  "displayName": "Conventionalize",
-  "version": "0.1.0",
+  "displayName": "Conventionalize: Conventional Commits Generator",
+  "description": "Generate Conventional Commits from staged diffs using offline heuristics, VS Code Language Models (Copilot), Gemini, or OpenAI.",
+  "version": "1.0.0",
   "publisher": "akil4",
   "engines": { "vscode": "^1.84.0" },
-  "main": "./dist/extension.js"
+  "main": "./dist/extension.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@conventionalize/core": "*"
+  }
 }
