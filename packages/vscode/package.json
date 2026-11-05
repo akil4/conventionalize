@@ -5,12 +5,141 @@
   "version": "1.0.0",
   "publisher": "akil4",
   "license": "MIT",
-  "engines": { "vscode": "^1.84.0" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/akil4/conventionalize"
+  },
+  "engines": {
+    "vscode": "^1.84.0"
+  },
+  "categories": [
+    "SCM Providers",
+    "Programming Languages",
+    "Machine Learning"
+  ],
+  "keywords": [
+    "git",
+    "commit",
+    "conventional-commits",
+    "scm",
+    "copilot",
+    "ai",
+    "diff"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./dist/extension.js",
   "scripts": {
     "vscode:prepublish": "npm run build",
     "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
     "watch": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --watch"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "conventionalize.generate",
+        "title": "Conventionalize: Generate Commit Message",
+        "icon": "$(sparkle)"
+      },
+      {
+        "command": "conventionalize.generateAndCommit",
+        "title": "Conventionalize: Generate & Commit",
+        "icon": "$(git-commit)"
+      },
+      {
+        "command": "conventionalize.openSettings",
+        "title": "Conventionalize: Open Settings"
+      }
+    ],
+    "menus": {
+      "scm/inputBox": [
+        {
+          "command": "conventionalize.generate",
+          "group": "inline"
+        }
+      ],
+      "scm/title": [
+        {
+          "command": "conventionalize.generate",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "conventionalize.generate"
+        },
+        {
+          "command": "conventionalize.generateAndCommit"
+        },
+        {
+          "command": "conventionalize.openSettings"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "conventionalize.generate",
+        "key": "ctrl+alt+c",
+        "mac": "cmd+alt+c"
+      }
+    ],
+    "configuration": {
+      "title": "Conventionalize",
+      "properties": {
+        "conventionalize.provider": {
+          "type": "string",
+          "enum": [
+            "heuristic",
+            "vscode-lm",
+            "gemini",
+            "openai"
+          ],
+          "default": "heuristic",
+          "description": "Provider engine: 'heuristic' (instant local rules), 'vscode-lm' (built-in GitHub Copilot), 'gemini' (Google Gemini), or 'openai' (OpenAI)."
+        },
+        "conventionalize.geminiApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Google Gemini API key (optional if using heuristic or vscode-lm)."
+        },
+        "conventionalize.openaiApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "OpenAI API key (optional if using heuristic or vscode-lm)."
+        },
+        "conventionalize.model": {
+          "type": "string",
+          "default": "gemini-3.7-flash",
+          "description": "Target LLM model (e.g. gemini-3.7-flash, gemini-3.5-flash-lite, gpt-4o-mini, gpt-4o)."
+        },
+        "conventionalize.ticketPrefix": {
+          "type": "string",
+          "default": "",
+          "description": "Optional ticket or issue prefix prepended to commit subjects (e.g. PROJ-123)."
+        },
+        "conventionalize.defaultScope": {
+          "type": "string",
+          "default": "",
+          "description": "Fallback scope when file path heuristics do not identify a single component."
+        },
+        "conventionalize.includeBody": {
+          "type": "boolean",
+          "default": false,
+          "description": "Append list of changed files and stats to the commit body."
+        },
+        "conventionalize.autoCommit": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically execute git commit immediately upon generating the message."
+        },
+        "conventionalize.maxDiffChars": {
+          "type": "number",
+          "default": 6000,
+          "description": "Maximum characters from the diff sent to AI providers."
+        }
+      }
+    }
   },
   "dependencies": {
     "@conventionalize/core": "*"
