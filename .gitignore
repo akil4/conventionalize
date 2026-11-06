@@ -1,4 +1,9 @@
 node_modules/
+dist/
+packages/*/dist/
+*.vsix
+*.tsbuildinfo
+.vscode-test/
 *.log
 .env
 .DS_Store
