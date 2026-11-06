@@ -1,97 +1,49 @@
 # conventionalize
 
-> **Diff to Conventional Commit Generator** powered by deterministic heuristics, VS Code Language Models (GitHub Copilot), Google Gemini, and OpenAI.
+Reads your staged git diff and writes your conventional commit message for you.
 
-Conventionalize inspects `git diff --staged` before you commit. It analyzes changed file paths, status, and patch hunks to propose a fully formatted Conventional Commit message (`type(scope): subject`) in a single step.
-
-Available as:
-- 🚀 **[VS Code Extension](#vs-code-extension)**: 1-click button directly inside the VS Code Source Control commit box.
-- 💻 **[Terminal CLI](#terminal-cli)**: Interactive CLI with autocompletion, history tracking, and Git hooks.
-- 📦 **[@conventionalize/core](#core-package)**: Lightweight, zero-heavy-dependency classification engine for custom integrations.
+Works as a **VS Code extension** (one-click button in the commit box) and a **terminal CLI**.
 
 ---
 
-## Architecture (Dual-Package Monorepo)
+## Why I made this
 
-```
-conventionalize/
-├── packages/
-│   ├── core/       # @conventionalize/core — Heuristics, diff parser, and AI engine
-│   ├── cli/        # conventionalize — Terminal CLI (Commander + Inquirer + Chalk)
-│   └── vscode/     # conventionalize-vscode — VS Code extension (SCM input box integration)
-├── tests/          # Shared test suite (Vitest)
-└── package.json    # Monorepo workspaces definition
-```
+Most git commit tools either:
+1. Make you answer 5 questions every single commit (`commitizen`, `git-cz`). Great in theory, annoying when you're committing 20 times a day.
+2. Complain *after* you already wrote the message (`commitlint`, `husky`).
+
+I wanted something in between: stage my changes, have it look at the actual diff, and suggest `type(scope): subject` in one step so I don't have to think about it.
 
 ---
 
-## VS Code Extension
+## Usage
 
-The fastest way to use Conventionalize. No terminal switching required.
+### In VS Code
 
-```
-┌────────────────────────────────────────────────────────┐
-│ SOURCE CONTROL                                    ...  │
-├────────────────────────────────────────────────────────┤
-│ [ feat(core): implement diff parser              ] [✨] │ ◄── Click to generate
-│                                                        │
-│ [ Commit & Push ]                                      │
-├────────────────────────────────────────────────────────┤
-│ STAGED CHANGES (2)                                     │
-│   src/parser.ts                                        │
-│   tests/parser.test.ts                                 │
-└────────────────────────────────────────────────────────┘
-```
+1. Stage your changes.
+2. Click the sparkle button right in the commit input box (or hit `Ctrl+Alt+C` / `Cmd+Alt+C`).
+3. It fills the box. Tweak if needed and commit.
 
-### Features
-- **1-Click Generation**: Adds a sparkle (`✨`) button directly in the Git commit message input box header.
-- **Built-in Language Models (`vscode.lm`)**: Works with GitHub Copilot models already in VS Code — no personal API keys required!
-- **Offline Heuristics**: Falls back to instant, zero-latency deterministic heuristics with zero network calls.
-- **Keyboard Shortcut**: Press `Ctrl+Alt+C` (`Cmd+Alt+C` on macOS) anywhere to populate the commit message.
+If you have GitHub Copilot enabled in VS Code, it uses that. If not, it uses fast local heuristics (offline, zero API keys needed), or your own Gemini / OpenAI key from settings.
 
-### Building & Installing the VS Code Extension Locally
+### In the terminal
 
 ```bash
-# Build the workspace
-npm install
-npm run build
+# run without installing
+npx conventionalize
 
-# Package the extension
-cd packages/vscode
-npx @vscode/vsce package
-
-# Install in VS Code
-code --install-extension conventionalize-vscode-1.0.0.vsix
-```
-
----
-
-## Terminal CLI
-
-### Installation
-
-Install globally via npm:
-
-```bash
+# or install globally
 npm install -g conventionalize
 ```
 
-Or run directly without installing using `npx`:
-
-```bash
-npx conventionalize
-```
-
-### Usage
-
-Stage your changes and run `conventionalize`:
+Stage files, then run:
 
 ```bash
 git add .
 conventionalize
 ```
 
-Sample interactive session:
+It looks like this:
 
 ```text
 conventionalize
@@ -110,51 +62,65 @@ Suggested Commit Message:
     Cancel
 ```
 
-#### Direct stdout mode (for shell scripts):
+#### Other handy CLI flags:
 
-```bash
-conventionalize --raw
-```
-
-#### Git hook installation:
-
-Automate `git commit` so it pre-populates commit headers using Conventionalize:
-
-```bash
-conventionalize hook install
-```
+- `conventionalize --raw`: prints just the message to stdout (great for shell scripts or custom aliases).
+- `conventionalize hook install`: writes a `.git/hooks/prepare-commit-msg` so standard `git commit` auto-suggests messages.
 
 ---
 
-## Core Package (`@conventionalize/core`)
+## How it works
 
-If you want to build custom integrations (e.g. CI bots, Git hooks, JetBrains plugins, or Agent MCP servers):
+When you run it, Conventionalize looks at the staged diff:
 
-```typescript
-import { parseGitDiff, classifyDiff, generateCommitMessage } from '@conventionalize/core';
-
-// Pure offline heuristic classification (zero network latency)
-const diff = parseGitDiff(rawDiffString);
-const message = classifyDiff(diff);
-console.log(message.formatted); // "feat(auth): add OAuth2 provider"
-```
+1. **Default (Heuristic)**: Runs locally. Parses file paths, touched extensions, test frameworks, and patch keywords (`fix`, `bug`, etc.) to infer type and scope. Instant, works offline, needs no keys.
+2. **AI (Copilot / Gemini / OpenAI)**: If you prefer an LLM to read the diff and summarize the intent, set `provider` to `vscode-lm`, `gemini`, or `openai`.
 
 ---
 
-## Development & Testing
+## Configuration
+
+Settings live in `~/.gcairc` for the CLI, or VS Code settings (`Ctrl+,` -> search `conventionalize`):
+
+```json
+{
+  "provider": "heuristic",
+  "model": "gemini-3.7-flash",
+  "ticketPrefix": "PROJ-123",
+  "defaultScope": "core"
+}
+```
+
+- `provider`: `heuristic`, `vscode-lm`, `gemini`, or `openai`.
+- `apiKey`: your Gemini or OpenAI API key (not needed for heuristic or VS Code Copilot).
+- `ticketPrefix`: automatically prepends Jira/Linear issue IDs (e.g. `[PROJ-123] feat: ...`).
+- `defaultScope`: fallback scope when changes span multiple folders.
+
+---
+
+## Project structure
+
+The repo is a minimal monorepo:
+
+- `packages/core`: pure diff parser + heuristic classifier (no heavy dependencies).
+- `packages/vscode`: the VS Code extension.
+- `packages/cli`: the terminal tool.
+
+### Building locally
 
 ```bash
-# Install dependencies across all packages
+git clone https://github.com/akil4/conventionalize.git
+cd conventionalize
 npm install
-
-# Build all packages (core, cli, vscode)
 npm run build
-
-# Run unit tests
 npm test
+```
 
-# Run tests in watch mode
-npm run test:watch
+To build the `.vsix` extension:
+
+```bash
+cd packages/vscode
+npx vsce package
 ```
 
 ---
