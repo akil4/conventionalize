@@ -1,23 +1,74 @@
 # conventionalize
 
-A terminal CLI tool that reads staged git diffs and suggests Conventional Commit header messages using local heuristic rules or an LLM.
+> **Diff to Conventional Commit Generator** powered by deterministic heuristics, VS Code Language Models (GitHub Copilot), Google Gemini, and OpenAI.
+
+Conventionalize inspects `git diff --staged` before you commit. It analyzes changed file paths, status, and patch hunks to propose a fully formatted Conventional Commit message (`type(scope): subject`) in a single step.
+
+Available as:
+- 🚀 **[VS Code Extension](#vs-code-extension)**: 1-click button directly inside the VS Code Source Control commit box.
+- 💻 **[Terminal CLI](#terminal-cli)**: Interactive CLI with autocompletion, history tracking, and Git hooks.
+- 📦 **[@conventionalize/core](#core-package)**: Lightweight, zero-heavy-dependency classification engine for custom integrations.
 
 ---
 
-## Motivation and prior art
+## Architecture (Dual-Package Monorepo)
 
-Existing git commit tools fall into two main categories:
-
-1. **Interactive prompts (`commitizen`, `git-cz`)**: These require answering multiple interactive questions for every single commit (selecting type, scope, subject, body, breaking changes). This adds friction for small, frequent atomic commits.
-2. **Git hooks (`husky`, `commitlint`)**: These validate commit messages after you write them, but do not help write or format the message.
-
-`conventionalize` bridges this gap by inspecting `git diff --staged` before you commit. It analyzes changed file paths, status, and patch hunks to propose a fully formatted Conventional Commit message (`type(scope): subject`) in one step.
+```
+conventionalize/
+├── packages/
+│   ├── core/       # @conventionalize/core — Heuristics, diff parser, and AI engine
+│   ├── cli/        # conventionalize — Terminal CLI (Commander + Inquirer + Chalk)
+│   └── vscode/     # conventionalize-vscode — VS Code extension (SCM input box integration)
+├── tests/          # Shared test suite (Vitest)
+└── package.json    # Monorepo workspaces definition
+```
 
 ---
 
-## Installation
+## VS Code Extension
 
-### From npm (recommended)
+The fastest way to use Conventionalize. No terminal switching required.
+
+```
+┌────────────────────────────────────────────────────────┐
+│ SOURCE CONTROL                                    ...  │
+├────────────────────────────────────────────────────────┤
+│ [ feat(core): implement diff parser              ] [✨] │ ◄── Click to generate
+│                                                        │
+│ [ Commit & Push ]                                      │
+├────────────────────────────────────────────────────────┤
+│ STAGED CHANGES (2)                                     │
+│   src/parser.ts                                        │
+│   tests/parser.test.ts                                 │
+└────────────────────────────────────────────────────────┘
+```
+
+### Features
+- **1-Click Generation**: Adds a sparkle (`✨`) button directly in the Git commit message input box header.
+- **Built-in Language Models (`vscode.lm`)**: Works with GitHub Copilot models already in VS Code — no personal API keys required!
+- **Offline Heuristics**: Falls back to instant, zero-latency deterministic heuristics with zero network calls.
+- **Keyboard Shortcut**: Press `Ctrl+Alt+C` (`Cmd+Alt+C` on macOS) anywhere to populate the commit message.
+
+### Building & Installing the VS Code Extension Locally
+
+```bash
+# Build the workspace
+npm install
+npm run build
+
+# Package the extension
+cd packages/vscode
+npx @vscode/vsce package
+
+# Install in VS Code
+code --install-extension conventionalize-vscode-1.0.0.vsix
+```
+
+---
+
+## Terminal CLI
+
+### Installation
 
 Install globally via npm:
 
@@ -31,45 +82,7 @@ Or run directly without installing using `npx`:
 npx conventionalize
 ```
 
-Or install as a project devDependency:
-
-```bash
-npm install --save-dev conventionalize
-```
-
-### From local source directory
-
-Clone the repository and install locally:
-
-```bash
-git clone https://github.com/akil4/conventionalize.git
-cd conventionalize
-npm install
-npm run build
-npm install -g .
-```
-
-### From GitHub release archive or Git URL
-
-Install directly from the GitHub repository archive:
-
-```bash
-npm install -g https://github.com/akil4/conventionalize/archive/refs/tags/v1.0.0.tar.gz
-```
-
-Or enable git dependencies in npm and install via git URL:
-
-```bash
-npm config set allow-remote true
-npm config set allow-git true
-npm install -g git+https://github.com/akil4/conventionalize.git
-```
-
----
-
-## Usage
-
-### Interactive mode (default)
+### Usage
 
 Stage your changes and run `conventionalize`:
 
@@ -78,13 +91,13 @@ git add .
 conventionalize
 ```
 
-Sample terminal interface:
+Sample interactive session:
 
 ```text
 conventionalize
 
 Staged files (2):
-  modified src/core/parser.ts (+15/-2)
+  modified src/parser.ts (+15/-2)
   added    tests/parser.test.ts (+35/-0)
 
 Suggested Commit Message:
@@ -97,104 +110,51 @@ Suggested Commit Message:
     Cancel
 ```
 
-### Direct stdout mode
-
-To output the formatted commit header directly to standard output for use in shell scripts:
+#### Direct stdout mode (for shell scripts):
 
 ```bash
 conventionalize --raw
 ```
 
-### Verbose telemetry mode
+#### Git hook installation:
 
-To view patch size, file counts, provider selection, and analysis latency:
-
-```bash
-conventionalize --debug
-```
-
-### Git hook installation
-
-To automate `git commit` so it pre-populates commit headers using `conventionalize`:
+Automate `git commit` so it pre-populates commit headers using Conventionalize:
 
 ```bash
 conventionalize hook install
 ```
 
-This writes a `.git/hooks/prepare-commit-msg` hook in the current repository.
-
 ---
 
-## Configuration
+## Core Package (`@conventionalize/core`)
 
-Settings are stored in `~/.gcairc`. You can configure settings interactively or view active values:
+If you want to build custom integrations (e.g. CI bots, Git hooks, JetBrains plugins, or Agent MCP servers):
 
-```bash
-conventionalize config
-conventionalize config --list
-```
+```typescript
+import { parseGitDiff, classifyDiff, generateCommitMessage } from '@conventionalize/core';
 
-Configuration schema:
-
-```json
-{
-  "provider": "heuristic",
-  "model": "gemini-3.7-flash",
-  "maxSummaryLength": 72,
-  "maxDiffChars": 6000,
-  "defaultScope": "core",
-  "ticketPrefix": "PROJ-123",
-  "autoCopy": false,
-  "includeBody": true,
-  "debug": false
-}
-```
-
-### Configuration fields
-
-- `provider`: Classification engine to use (`heuristic`, `gemini`, `openai`).
-- `apiKey`: API key for Gemini or OpenAI providers.
-- `model`: Target LLM model name (e.g. `gemini-3.7-flash`, `gemini-3.5-flash-lite`, `gpt-4o-mini`, `o3-mini`).
-- `defaultScope`: Fallback scope when path inference yields no common top-level directory.
-- `ticketPrefix`: Prefix prepended to commit subjects (e.g., `[PROJ-123]`).
-- `maxDiffChars`: Truncation limit for diff patches sent to LLM providers (default: 6000).
-
----
-
-## Shell autocompletion
-
-Generate shell tab completion scripts for bash or zsh:
-
-```bash
-# zsh completion
-conventionalize completion zsh > ~/.zsh/completion/_conventionalize
-
-# bash completion
-conventionalize completion bash > /etc/bash_completion.d/conventionalize
+// Pure offline heuristic classification (zero network latency)
+const diff = parseGitDiff(rawDiffString);
+const message = classifyDiff(diff);
+console.log(message.formatted); // "feat(auth): add OAuth2 provider"
 ```
 
 ---
 
-## Trade-offs and limitations
-
-- **Diff size truncation**: Diffs exceeding `maxDiffChars` (default: 6,000 characters) are truncated. For large structural refactors spanning multiple packages, break changes into smaller atomic commits.
-- **Non-git directories**: `conventionalize` requires an active git working tree. Running the tool outside a git repository exits with code 1.
-- **Offline classification bounds**: The default local heuristic classifier relies on path structures and patch keywords. For ambiguous refactors without clear file additions or bug fix keywords, an LLM provider yields higher semantic precision.
-
----
-
-## Testing
-
-Run the test suite using Vitest:
+## Development & Testing
 
 ```bash
-npm test
-```
+# Install dependencies across all packages
+npm install
 
-Build the TypeScript executable:
-
-```bash
+# Build all packages (core, cli, vscode)
 npm run build
+
+# Run unit tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
 ```
 
 ---
